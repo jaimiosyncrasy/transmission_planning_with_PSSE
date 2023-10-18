@@ -1,0 +1,28 @@
+import math
+import psspy
+
+def parse_return(func_name,lst):
+    '''interpret the items returned from func call'''
+    if len(lst)!=2:
+        print('func {} doesnt return 2 items; expected return of (ierr,iarrray)'.format(func_name))
+    err,res=lst
+    if err == 0:
+        print('{} result={}'.format(func_name,res[0]))
+        return res
+    else:
+        print('{} error code={}'.format(func_name,err))
+        return None
+
+def get_duplicate_idx(seq):
+    idx_to_remove=[]
+    seq_so_far=[]
+    for i in range(len(seq)):
+        if any([math.isclose(seq[i],a,abs_tol=1e-5) for a in seq_so_far]):
+            idx_to_remove.append(i)
+        seq_so_far.append(seq[i])
+    return idx_to_remove
+
+def check_bus_exists(bus_num):
+    nwk_buses=psspy.abusint(string=['NUMBER'])[1]
+    if bus_num not in nwk_buses:
+        print('{} not in {}'.format(bus_num,nwk_buses))
