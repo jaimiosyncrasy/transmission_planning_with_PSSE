@@ -17,7 +17,7 @@ def get_duplicate_idx(seq):
     idx_to_remove=[]
     seq_so_far=[]
     for i in range(len(seq)):
-        if any([math.isclose(seq[i],a,abs_tol=1e-5) for a in seq_so_far]):
+        if any([math.isclose(seq[i],a,abs_tol=1e-9) for a in seq_so_far]):
             idx_to_remove.append(i)
         seq_so_far.append(seq[i])
     return idx_to_remove

@@ -8,11 +8,11 @@ from utils import parse_return, get_duplicate_idx, open_case
 # path_to_cases="C:/Users/jaimi/OneDrive/Documents/PTI/PSSE35/my_cases/3bus/"
 # filename="3bus.sav"
 path_to_cases="C:/Users/jaimi/OneDrive/Documents/PTI/PSSE35/my_cases/7bus/"
-# filename="7bus_with_xfmr_and_wind.sav"
-filename="foo.sav"
+filename="7bus_with_xfmr_and_wind.sav"
 psspy.psseinit()
 open_case(path_to_cases+filename)
 psspy.fdns([0,0,0,1,1,0,99,0])
+
 bus_df1=create_bus_results()
 branch_df1=create_branch_results()
 xfmr_df=create_xfmr_results()
