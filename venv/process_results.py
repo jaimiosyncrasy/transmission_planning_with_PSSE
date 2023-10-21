@@ -11,7 +11,6 @@ def process_bus_results():
     bus_dict['Vmag (kV)'] = bus_v[1]
     bus_dict['Vang (deg)'] = bus_v[2]
     bus_df= pd.DataFrame(data=bus_dict,index=bus_info[0])
-    print(bus_df)
     return bus_df
 
 def process_branch_results():
@@ -29,5 +28,4 @@ def process_branch_results():
     branch_dict['Q (MVar)'] = [flow[1][i] for i in dup_idx]
     branch_dict['overload (%)'] = [branch_ovd_percent[i] for i in dup_idx]
     branch_df= pd.DataFrame(data=branch_dict)
-    print(branch_df)
     return branch_df

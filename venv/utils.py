@@ -22,7 +22,10 @@ def get_duplicate_idx(seq):
         seq_so_far.append(seq[i])
     return idx_to_remove
 
-def check_bus_exists(bus_num):
-    nwk_buses=psspy.abusint(string=['NUMBER'])[1]
+def bus_exists(bus_num):
+    nwk_buses=psspy.abusint(string=['NUMBER'])[1][0]
     if bus_num not in nwk_buses:
-        print('{} not in {}'.format(bus_num,nwk_buses))
+        print('bus {} not in nwk {}'.format(bus_num,nwk_buses))
+        return False
+    else:
+        return True
