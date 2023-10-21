@@ -29,3 +29,16 @@ def bus_exists(bus_num):
         return False
     else:
         return True
+
+def open_case(path_and_file):
+    err_code=psspy.case(path_and_file)
+    if err_code== 0:
+        return
+    elif err_code== 1:
+        raise Exception('error opening file: file is blank')
+    elif err_code== 2:
+        print('error reading the case file')
+        raise Exception('error reading file')
+    elif err_code== 3:
+        raise Exception('error opening file: file not found')
+
