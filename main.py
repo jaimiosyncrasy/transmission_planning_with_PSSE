@@ -1,6 +1,8 @@
+import psse35 # this must come before 'import psspy' for psspy to be found!
 import psspy
 
-from assess_circuit import create_bus_results, create_branch_results, create_xfmr_results
+from algorithms import iteration_add_br
+from assess_circuit import create_bus_results, create_branch_results, create_xfmr_results, create_branch_lst
 from utils import open_case
 
 # path_to_cases="C:/Users/jaimi/OneDrive/Documents/PTI/PSSE35/my_cases/3bus/"
@@ -11,10 +13,10 @@ psspy.psseinit()
 open_case(path_to_cases+filename)
 psspy.fdns([0,0,0,1,1,0,99,0])
 
-bus_df1=create_bus_results()
-branch_df1=create_branch_results()
-xfmr_df=create_xfmr_results()
-print(xfmr_df)
+# bus_df1=create_bus_results()
+# branch_df1=create_branch_results()
+# xfmr_df=create_xfmr_results()
+# print(xfmr_df)
 #
 # # add_load(bus_num=675,loadP=50,loadQ=20)
 # add_bus(type=1,num=676,base_kva=200)
@@ -46,3 +48,7 @@ print(xfmr_df)
 # -> reduces line+xfmr overloading the most
 
 # ^can add a load and check for the same thing
+
+nwk_branches=create_branch_lst()
+new_br_parms={'R':0.001,'X':0.005,'MAX_MVA':100}
+iteration_add_br(nwk_branches,new_br_parms)
