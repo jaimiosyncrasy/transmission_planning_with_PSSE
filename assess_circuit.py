@@ -55,11 +55,15 @@ def create_branch_lst():
     branch_from = parse_return('aflowint', psspy.aflowint(string=['FROMNUMBER']))[0]
     branch_to = parse_return('aflowint', psspy.aflowint(string=['TONUMBER']))[0]
     branch_ID = parse_return('aflowchar', psspy.aflowchar(string=['ID']))[0]
-    unique_idx=[i for i in range(len(branch_ID)) if branch_ID[i] != '1 '] # ID=1 is assigned to extra branches not in the SLD
-    branch_lst=[]
-    for i in unique_idx:
-        branch_lst.append(Branch(branch_ID[i],branch_from[i],branch_to[i],i))
+    unique_idx,branch_lst=[],[]
+    for i in range(len(branch_ID)):
+        if branch_ID[i] not in unique_idx:
+            unique_idx.append(branch_ID[i])
+            branch_lst.append(Branch(branch_ID[i], branch_from[i], branch_to[i], i))
+    # unique_idx=[i for i in range(len(branch_ID)) if branch_ID[i] != '1 '] # ID=1 is assigned to extra branches not in the SLD
     return branch_lst
+# todo: why is unique_idx len 9 while branch_lst is len 8; they should be the same
+# todo: remove the ID=1 from both
 def create_branch_results(branch_lst):
     '''we assume that all branches have an ID that isnt the default of 1'''
     unique_idx=[br.br_idx for br in branch_lst]
@@ -73,7 +77,7 @@ def create_branch_results(branch_lst):
     branch_dict={}
     branch_dict['from'] = [br.bus_FROMNUMBER for br in branch_lst]
     branch_dict['to'] = [br.bus_TONUMBER for br in branch_lst]
-    branch_dict['ID'] = [br.branchID for br in branch_lst]
+    branch_dict['ID'] = [br.branch_ID for br in branch_lst]
     branch_dict['P (MW)'] = [flow[0][i] for i in unique_idx]
     branch_dict['Q (MVar)'] = [flow[1][i] for i in unique_idx]
     branch_dict['overload (%)'] = [branch_ovd_percent[i] for i in unique_idx]
