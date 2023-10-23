@@ -23,8 +23,8 @@ def iteration_add_br(nwk_branches,parm_dict):
             bus_df=create_bus_results()
             metrics_dict=compute_metrics_on_nwk(branch_df,bus_df)
             data.append(list(new_br.info.values())+list(metrics_dict.values()))
-            nwk_branches.pop() # remove added branch
-            psspy.remove_br
+            nwk_branches.pop(0) # remove added branch
+            psspy.purgbrn(new_br.bus_FROMNUMBER, new_br.bus_TONUMBER,new_br.branch_ID)  # reset
 
     col_names=list(new_br.info.keys())+list(metrics_dict.keys())
     results_df=pd.DataFrame(data,columns=col_names)

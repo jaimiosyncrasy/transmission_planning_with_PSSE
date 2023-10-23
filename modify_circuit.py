@@ -37,6 +37,7 @@ def add_br(FROM_BR_NUM,TO_BR_NUM,parm_dict):
     #
     if code1!=0 or code2!=0:
         print('error adding branch. add br err={},change br err={}'.format(code1,code2))
+        psspy.purgbrn(FROM_BR_NUM,TO_BR_NUM,ID) # remove incorrectly added branch
         return None
     else:
         len_br_lst=len(parse_return('aflowint', psspy.aflowint(string=['FROMNUMBER']))[0])

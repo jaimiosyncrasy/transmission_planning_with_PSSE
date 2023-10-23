@@ -57,13 +57,11 @@ def create_branch_lst():
     branch_ID = parse_return('aflowchar', psspy.aflowchar(string=['ID']))[0]
     unique_idx,branch_lst=[],[]
     for i in range(len(branch_ID)):
-        if branch_ID[i] not in unique_idx:
+        if branch_ID[i] not in unique_idx and branch_ID[i] != '1 ':
             unique_idx.append(branch_ID[i])
             branch_lst.append(Branch(branch_ID[i], branch_from[i], branch_to[i], i))
     # unique_idx=[i for i in range(len(branch_ID)) if branch_ID[i] != '1 '] # ID=1 is assigned to extra branches not in the SLD
     return branch_lst
-# todo: why is unique_idx len 9 while branch_lst is len 8; they should be the same
-# todo: remove the ID=1 from both
 def create_branch_results(branch_lst):
     '''we assume that all branches have an ID that isnt the default of 1'''
     unique_idx=[br.br_idx for br in branch_lst]
