@@ -21,11 +21,10 @@ def add_load(bus_num,loadP,loadQ):
     if code1!=0 or code2!=0:
         raise Exception('error adding load')
     return True
-def add_br(FROM_BR_NUM,TO_BR_NUM,parm_dict):
+def add_br(FROM_BR_NUM,TO_BR_NUM,parm_dict,ID):
     X,R,MAX_MVA=parm_dict['X'],parm_dict['R'],parm_dict['MAX_MVA']
     assert bus_exists(FROM_BR_NUM)
     assert bus_exists(TO_BR_NUM)
-    ID='19' # todo: generalize this
     _i,_f,_s,_o=psspy._i,psspy._f,psspy._s,psspy._o
     code1=psspy.branch_data_3(FROM_BR_NUM,TO_BR_NUM,ID,[1,FROM_BR_NUM,1,_i,_i,_i],[R,X,_f,_f,_f,_f,_f,_f,_f,_f,_f,_f],[MAX_MVA,_f,_f,_f,_f,_f,_f,_f,_f,_f,_f,_f],"")
     # code2=psspy.branch_chng_3(FROM_BR_NUM,TO_BR_NUM,r"""19""",[_i,_i,_i,_i,_i,_i],[R,X,_f,_f,_f,_f,_f,_f,_f,_f,_f,_f],[MAX_MVA,_f,_f,_f,_f,_f,_f,_f,_f,_f,_f,_f],r"""MYNAME""")

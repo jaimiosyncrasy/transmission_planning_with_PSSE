@@ -2,7 +2,7 @@ import psse35 # this must come before 'import psspy' for psspy to be found!
 import psspy
 
 from algorithms import iteration_add_br
-from assess_circuit import create_bus_results, create_branch_results, create_xfmr_results, create_branch_lst
+from assess_circuit import create_branch_lst
 from utils import open_case
 
 # path_to_cases="C:/Users/jaimi/OneDrive/Documents/PTI/PSSE35/my_cases/3bus/"
@@ -36,7 +36,7 @@ psspy.fdns([0,0,0,1,1,0,99,0])
 # print(branch_df2)
 
 # automated routine 1:
-# add a load to various buses and determine the bus that
+# replace an xfmr with larger ampacity on various branches and determine the xfmr that
 # -> reduces line congestion the most
 # -> reduced fault currents the most
 # -> reduces line+xfmr overloading the most
@@ -44,11 +44,12 @@ psspy.fdns([0,0,0,1,1,0,99,0])
 # automated routine 2:
 # add a transmission line to various buses and determine the bus that
 # -> reduces line congestion the most
-# -> reduced fault currents the most
+# -> reduces fault currents the most
 # -> reduces line+xfmr overloading the most
 
 # ^can add a load and check for the same thing
 
 nwk_branches=create_branch_lst()
 new_br_parms={'R':0.001,'X':0.005,'MAX_MVA':100}
-iteration_add_br(nwk_branches,new_br_parms)
+results_df, ans_dict=iteration_add_br(nwk_branches,new_br_parms)
+plot_lines(results_df)
