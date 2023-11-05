@@ -12,7 +12,7 @@ class Branch:
         self.bus_TONUMBER=bus_TONUMBER
         self.bus_FROMNUMBER=bus_FROMNUMBER
         self.br_idx=br_idx # index of branch in lst returned by psspy
-        self.info=dict(branch_ID=self.branch_ID,bus_FROMNUMBER=self.bus_FROMNUMBER,bus_TONUMBER=self.bus_TONUMBER)
+        self.info=dict(branch_ID=int(self.branch_ID),bus_FROMNUMBER=self.bus_FROMNUMBER,bus_TONUMBER=self.bus_TONUMBER)
 
 class Scenario:
     '''captures grid network info for particular scenario of a change in the network;
@@ -21,7 +21,7 @@ class Scenario:
         branch_table=self.create_branch_results(nwk_branches)
         bus_table=self.create_bus_results()
         xfmr_table=self.create_xfmr_results()
-        sc_table=self.create_sc_results()
+        # sc_table=self.create_sc_results()
         self.upgrade_ele=upgrade_ele
         self.nwk_branches=nwk_branches
         self.branch_table=branch_table
@@ -44,8 +44,8 @@ class Scenario:
         # fault_I_lst=
         avg_metrics = {
             'line_overload': sum(br_overload_lst) / len(br_overload_lst),
-            'xfmr_overload': sum(br_overload_lst) / len(br_overload_lst),
-            'fault_currents': sum(br_overload_lst) / len(br_overload_lst)
+            'xfmr_overload': sum(xfmr_overload_lst) / len(xfmr_overload_lst),
+            # 'fault_currents': sum(br_overload_lst) / len(br_overload_lst)
         }
         # line congestion
         # xfmr overloading
@@ -104,21 +104,21 @@ class Scenario:
         return xfmr_df
 
     def create_sc_results(self):
-        import pssarrays
-        robj = pssarrays.ascc_currents(
-            sid=0,  # this could be different for you
-            flt3ph=1,  # you may wish to apply different faults
+        '''run short circuit analysis and return table of SC currents'''
+        import arrbox.ascc
+        robj = arrbox.ascc.ascc_currents(sid=0,all=1,
+                                         flt3ph=1,fltlg=1  # you may wish to apply different faults
         )
-        robj.fltbus
-        robj.flt3ph.values()
-        # _i, _f, _s, _o = psspy._i, psspy._f, psspy._s, psspy._o
-        # code1=psspy.ascc_3(0, 1, [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0], 1.0, "", "", "")
-        # code2=psspy.setdiagresascc_3(2, 0, _i, _i, _i, 1, 0, _i, _i, _i, "") #set the ASCC short circuit analysis annotation options in the active Slider diagram
-        # xfmr_dict = {}
-        # xfmr_dict['from'] = [branch_from[i] for i in unique_idx]
-        # if code1!=0 or code2!=0:
-        #     raise Exception('error adding load')
-        # return True
+        if robj.ierr!=0:
+            raise Exception('error computing SC analysis')
+        else:
+            flt3ph=robj.flt3ph.values()
+            # robj.fltlg.values()
+            flt_busnum=robj.fltbus # list of faulted bus numbers
+            # todo: process the outputted values
+        return True
+
+
 def plot_double_bar():
     '''plot overlapping bar plots'''
     x_lst = [np.array([1, 2, 3, 4]),[2, 4, 6, 8]]
@@ -134,12 +134,14 @@ def plot_double_bar():
 
 
 
-def determine_best_upgrades(results_df):
+def determine_best_upgrades(results_df,metric):
     '''returns a dict where keys are category, and value is the scenario index'''
-    pass
+    assert metric in results_df.columns
+    return results_df.sort_values(by=[metric])
 
 
 def create_branch_lst():
+    '''return list of Branch objects'''
     branch_from = parse_return('aflowint', psspy.aflowint(string=['FROMNUMBER']))[0]
     branch_to = parse_return('aflowint', psspy.aflowint(string=['TONUMBER']))[0]
     branch_ID = parse_return('aflowchar', psspy.aflowchar(string=['ID']))[0]

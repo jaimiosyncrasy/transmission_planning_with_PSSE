@@ -47,9 +47,12 @@ psspy.fdns([0,0,0,1,1,0,99,0])
 # -> reduces fault currents the most
 # -> reduces line+xfmr overloading the most
 
-# ^can add a load and check for the same thing
+# routine 3:
+# given a bus of interest,
+# add a transmission line and return summary of changes to congestion, fault currents, and line+xfmr loading
 
 nwk_branches=create_branch_lst()
 new_br_parms={'R':0.001,'X':0.005,'MAX_MVA':100}
-results_df, ans_dict=iteration_add_br(nwk_branches,new_br_parms)
+metric = 'xfmr_overload'  # you choose metric to determine best upgrade
+results_df, scenario_lst, results_df_ordered=iteration_add_br(nwk_branches,new_br_parms,metric)
 plot_lines(results_df)
