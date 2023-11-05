@@ -1,0 +1,18 @@
+# automated routine 1:
+# replace an xfmr with larger ampacity on various branches and determine the xfmr that
+# -> reduces line congestion the most
+# -> reduced fault currents the most
+# -> reduces line+xfmr overloading the most
+
+# automated routine 2:
+# add a transmission line to various buses and determine the bus that
+# -> reduces line congestion the most
+# -> reduces fault currents the most
+# -> reduces line+xfmr overloading the most
+
+# routine 3:
+# given a bus of interest,
+# add a transmission line and return summary of changes to congestion, fault currents, and line+xfmr loading
+
+
+#----------------------------------------

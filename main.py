@@ -14,32 +14,11 @@ path_to_cases="C:/Users/jaimi/OneDrive/Documents/PTI/PSSE35/my_cases/7bus/"
 filename="7bus_with_xfmr_and_wind.sav"
 psspy.psseinit()
 open_case(path_to_cases+filename)
-psspy.fdns([0,0,0,1,1,0,99,0])
 
-# automated routine 1:
-# replace an xfmr with larger ampacity on various branches and determine the xfmr that
-# -> reduces line congestion the most
-# -> reduced fault currents the most
-# -> reduces line+xfmr overloading the most
-
-# automated routine 2:
-# add a transmission line to various buses and determine the bus that
-# -> reduces line congestion the most
-# -> reduces fault currents the most
-# -> reduces line+xfmr overloading the most
-
-# routine 3:
-# given a bus of interest,
-# add a transmission line and return summary of changes to congestion, fault currents, and line+xfmr loading
-
-
-#----------------------------------------
-
-
+# --------- setup -------------
 random.seed(4) # so that get same random colors plotted each time
 nwk_branches=create_branch_lst()
 new_br_parms={'R':0.001,'X':0.005,'MAX_MVA':100}
-# metric = 'line_overload'  # you choose metric to determine best upgrade
 metric_details={'line_overload':'MVA overload (%)',
                 'xfmr_overload':'MVA overload (%)',
                 'voltage':'Vmag (pu)'}
