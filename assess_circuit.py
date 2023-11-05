@@ -132,21 +132,6 @@ class Scenario:
         return True
 
 
-def plot_double_bar():
-    '''plot overlapping bar plots'''
-    x_lst = [np.array([1, 2, 3, 4]),[2, 4, 6, 8]]
-    y_lst = [x * 2,[3, 5, 7, 9]]
-
-    for i in range(len(x)):
-        plt.plot(x, y)
-
-    plt.xlabel("X-axis data")
-    plt.ylabel("Y-axis data")
-    plt.title('multiple plots')
-    plt.show()
-
-
-
 def determine_best_upgrades(results_df,metric_details):
     '''returns a dict where keys are category, and value is the scenario index'''
     lst_df=[]
