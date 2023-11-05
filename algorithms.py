@@ -2,52 +2,60 @@ import itertools
 
 from assess_circuit import create_branch_lst, \
     determine_best_upgrades, Scenario
+from plot import setup_plotting, format_plots
 from utils import parse_return,get_duplicate_idx
 import psspy
 import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-from more_itertools import unique_everseen
 from modify_circuit import add_br
 
 
-def iteration_add_br(nwk_branches,parm_dict,metric):
-    '''iterate over different bus combos and add a branch, evaluating which scneario is best'''
-    bus_info=parse_return('abusint',psspy.abusint(string=['NUMBER']))[0]
+def assess_added_ele(bus_pair,parm_dict,ID,nwk_branches,metric_details,ax_lst,plot_bool):
+    '''inner computational function for adding & assessing an added branch'''
+    new_br = add_br(bus_pair[0], bus_pair[1], parm_dict, ID)
+    scen,avg_metrics_on_nwk=None,None
+    if new_br is not None:
+        nwk_branches = create_branch_lst()
+        psspy.fdns([0, 0, 0, 1, 1, 0, 99, 0])  # solve power flow
+        scen = Scenario(new_br, nwk_branches)
+        if plot_bool:
+            for metric_name, metric_detail in metric_details.items():
+                i = list(metric_details.keys()).index(metric_name)
+                scen.plot_quantity(ax_lst[i], metric_name, metric_detail)
+        avg_metrics_on_nwk = scen.compute_metrics_on_nwk()
+        nwk_branches.pop(0)  # remove added branch
+    psspy.purgbrn(bus_pair[0], bus_pair[1], ID)  # reset
+
+    return nwk_branches,new_br,avg_metrics_on_nwk,scen
+
+def iteration_add_br(bus_pairs,nwk_branches,parm_dict,metric_details,plot_bool):
+    '''iterate over different bus combos and add a branch,
+    call assess_added_ele, then summarize which scenario is best'''
+
     data=[] # each ele is row of results table
-    scenario_lst=[]
-    count=0
-    for bus_pair in itertools.combinations(bus_info, 2):
+    scenario_lst,count=[],0
+
+    if plot_bool:
+        ax_lst=setup_plotting(len(metric_details.keys()))
+
+    for bus_pair in bus_pairs:
         # branch_df = create_branch_results(nwk_branches)
-        count+=1
         ID=str(20+count) # todo: generalize this
-        new_br=add_br(bus_pair[0], bus_pair[1], parm_dict,ID)
+        nwk_branches,new_br,avg_metrics_on_nwk,scen=assess_added_ele(bus_pair,parm_dict,ID,nwk_branches,metric_details,ax_lst,plot_bool)
         if new_br is not None:
-            nwk_branches=create_branch_lst()
-            psspy.fdns([0, 0, 0, 1, 1, 0, 99, 0]) # solve power flow
-            scen=Scenario(new_br, nwk_branches)
             scenario_lst.append(scen)
-            if metric=='line_overload':
-                scen.plot_quantity('MVA overload (%)')
-                # plot_label='MVA overload (%)'
-                # list(self.bus_table['ID'])
-            avg_metrics_on_nwk=scen.compute_metrics_on_nwk()
-            data.append(list(new_br.info.values())+list(avg_metrics_on_nwk.values()))
-            nwk_branches.pop(0) # remove added branch
-        psspy.purgbrn(bus_pair[0], bus_pair[1],ID)  # reset
+            data.append(list(new_br.info.values()) + list(avg_metrics_on_nwk.values()))
+        count += 1
+
     col_names=list(new_br.info.keys())+list(avg_metrics_on_nwk.keys())
     results_df=pd.DataFrame(data,columns=col_names)
-    results_df_ordered=determine_best_upgrades(results_df,metric)
-    return results_df, scenario_lst, results_df_ordered
+    lst_ordered_results=determine_best_upgrades(results_df,metric_details)
 
-def iteration_add_load(assess_func,parms):
-    bus_info=parse_return('abusint',psspy.abusint(string=['NUMBER','TYPE']))
-    data=[] # each ele is row of results table
-    for bus in itertools.combinations(bus_info, 2):
-        add_br(bus_pair[0], bus_pair[1], parm_dict)
-        metrics_dict=compute_metrics_on_nwk()
-        data.append(list(bus_pair)+list(metrics_dict.values()))
+    if plot_bool:
+        format_plots(ax_lst,metric_details)
 
-    col_names=['bus num']+list(metrics_dict.keys())
-    results_df=pd.DataFrame(data,columns=col_names)
-    return results_df
+    return results_df, scenario_lst, lst_ordered_results
+
+
+
+def iteration_add_wind(nwk_branches,parm_dict,metric_details,plot_bool):
+    pass

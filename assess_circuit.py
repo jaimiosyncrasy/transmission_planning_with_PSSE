@@ -5,6 +5,7 @@ import psspy
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import random
 
 class Branch:
     def __init__(self,br_ID,bus_FROMNUMBER,bus_TONUMBER,br_idx):
@@ -29,27 +30,35 @@ class Scenario:
         self.branch_table=branch_table
         self.bus_table=bus_table
         self.xfmr_table=xfmr_table
-    def plot_quantity(self, qty_name):
+    def plot_quantity(self, ax,qty_name, qty_dtl_name):
         '''take associated column of branch or bus table and plot'''
-        bus_options=('Vmag (pu)','Vmag (kV)', 'Vang (deg)')
-        branch_options=('P (MW)','Q (MVar)', 'MVA overload (%)')
-        # todo: add option to plot xfmr overload
-        if qty_name in bus_options:
-            plt.plot(list(self.bus_table[qty_name]), label='add br '+self.upgrade_ele.get_ID())
-            # plt.xticks(list(self.bus_table[qty_name]), list(self.bus_table['ID']),rotation=20)
-        elif qty_name in branch_options:
-            plt.plot(list(self.branch_table[qty_name]), label='add br '+self.upgrade_ele.get_ID())
-            print('ID={}'.format(list(self.branch_table['ID'])))
+        # bus_options=('Vmag (pu)','Vmag (kV)', 'Vang (deg)')
+        # branch_options=('P (MW)','Q (MVar)', 'MVA overload (%)')
+        # xfmr_options=('P (MW)','Q (MVar)', 'MVA overload (%)')
+        color=str(hex(random.randrange(0, 2 ** 24))[2:]) # create random hex color
+        while len(color)<6: # zero pad
+            color+='0'
+        color='#'+color
+        if qty_name=='line_overload':
+            ax.plot(list(self.branch_table[qty_dtl_name]),'-o', color=color,label='add br ' + self.upgrade_ele.get_ID())
+            # print('ID={}'.format(list(self.branch_table['ID'])))
+        elif qty_name=='xfmr_overload':
+            ax.plot(list(self.xfmr_table[qty_dtl_name]), '-o',color=color,label='add br ' + self.upgrade_ele.get_ID())
+            # print('ID={}'.format(list(self.xfmr_table['ID'])))
+        elif qty_name=='voltage':
+            ax.plot(list(self.bus_table[qty_dtl_name]), '-o',color=color,label='add br ' + self.upgrade_ele.get_ID())
+
     def compute_metrics_on_nwk(self):
         br_overload_lst=self.branch_table['MVA overload (%)'].tolist()
         xfmr_overload_lst=self.xfmr_table['MVA overload (%)'].tolist()
+        voltage_lst=self.bus_table['Vmag (pu)'].tolist()
         # shortcircuit_I_lst=
         # xfmr_overload_lst=
         # fault_I_lst=
         avg_metrics = {
             'line_overload': sum(br_overload_lst) / len(br_overload_lst),
             'xfmr_overload': sum(xfmr_overload_lst) / len(xfmr_overload_lst),
-            # 'fault_currents': sum(br_overload_lst) / len(br_overload_lst)
+            'voltage': sum(voltage_lst) / len(voltage_lst),
         }
         # line congestion
         # xfmr overloading
@@ -138,10 +147,13 @@ def plot_double_bar():
 
 
 
-def determine_best_upgrades(results_df,metric):
+def determine_best_upgrades(results_df,metric_details):
     '''returns a dict where keys are category, and value is the scenario index'''
-    assert metric in results_df.columns
-    return results_df.sort_values(by=[metric])
+    lst_df=[]
+    for metric in metric_details.keys():
+        assert metric in results_df.columns
+        lst_df.append(results_df.sort_values(by=[metric]))
+    return lst_df
 
 
 def create_branch_lst():
