@@ -3,7 +3,9 @@ import psspy
 
 from algorithms import iteration_add_br
 from assess_circuit import create_branch_lst
+from plot import plot_lines
 from utils import open_case
+import matplotlib.pyplot as plt
 
 # path_to_cases="C:/Users/jaimi/OneDrive/Documents/PTI/PSSE35/my_cases/3bus/"
 # filename="3bus.sav"
@@ -53,6 +55,11 @@ psspy.fdns([0,0,0,1,1,0,99,0])
 
 nwk_branches=create_branch_lst()
 new_br_parms={'R':0.001,'X':0.005,'MAX_MVA':100}
-metric = 'xfmr_overload'  # you choose metric to determine best upgrade
+metric = 'line_overload'  # you choose metric to determine best upgrade
+ax = plt.figure().add_subplot(111)
 results_df, scenario_lst, results_df_ordered=iteration_add_br(nwk_branches,new_br_parms,metric)
-plot_lines(results_df)
+print(results_df_ordered)
+plt.legend(loc="upper left")
+metric_details={'line_overload':'MVA overload (%)','xfmr_overload':'MVA overload (%)'}
+plt.xlabel('branch '+metric_details[metric])
+plt.show()

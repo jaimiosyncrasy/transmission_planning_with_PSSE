@@ -27,13 +27,17 @@ def iteration_add_br(nwk_branches,parm_dict,metric):
             psspy.fdns([0, 0, 0, 1, 1, 0, 99, 0]) # solve power flow
             scen=Scenario(new_br, nwk_branches)
             scenario_lst.append(scen)
+            if metric=='line_overload':
+                scen.plot_quantity('MVA overload (%)')
+                # plot_label='MVA overload (%)'
+                # list(self.bus_table['ID'])
             avg_metrics_on_nwk=scen.compute_metrics_on_nwk()
             data.append(list(new_br.info.values())+list(avg_metrics_on_nwk.values()))
             nwk_branches.pop(0) # remove added branch
         psspy.purgbrn(bus_pair[0], bus_pair[1],ID)  # reset
     col_names=list(new_br.info.keys())+list(avg_metrics_on_nwk.keys())
     results_df=pd.DataFrame(data,columns=col_names)
-    best_scenarios=determine_best_upgrades(results_df,metric)
+    results_df_ordered=determine_best_upgrades(results_df,metric)
     return results_df, scenario_lst, results_df_ordered
 
 def iteration_add_load(assess_func,parms):

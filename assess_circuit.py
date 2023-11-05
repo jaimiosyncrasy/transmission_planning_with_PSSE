@@ -12,8 +12,10 @@ class Branch:
         self.bus_TONUMBER=bus_TONUMBER
         self.bus_FROMNUMBER=bus_FROMNUMBER
         self.br_idx=br_idx # index of branch in lst returned by psspy
-        self.info=dict(branch_ID=int(self.branch_ID),bus_FROMNUMBER=self.bus_FROMNUMBER,bus_TONUMBER=self.bus_TONUMBER)
+        self.info=dict(branch_ID=int(self.get_ID()),bus_FROMNUMBER=self.bus_FROMNUMBER,bus_TONUMBER=self.bus_TONUMBER)
 
+    def get_ID(self):
+        return self.branch_ID
 class Scenario:
     '''captures grid network info for particular scenario of a change in the network;
     allows for computing aggregate metrics and plotting'''
@@ -27,15 +29,17 @@ class Scenario:
         self.branch_table=branch_table
         self.bus_table=bus_table
         self.xfmr_table=xfmr_table
-    def plot_quantity(self,col_string):
+    def plot_quantity(self, qty_name):
         '''take associated column of branch or bus table and plot'''
         bus_options=('Vmag (pu)','Vmag (kV)', 'Vang (deg)')
-        branch_options=('P (MW)','Q (MVar)', 'overload (%)')
-        if col_string in bus_options:
-            plt.plot(self.bus_table[col_string])
-        elif col_string in branch_options:
-            plt.plot(self.branch_table[col_string])
-
+        branch_options=('P (MW)','Q (MVar)', 'MVA overload (%)')
+        # todo: add option to plot xfmr overload
+        if qty_name in bus_options:
+            plt.plot(list(self.bus_table[qty_name]), label='add br '+self.upgrade_ele.get_ID())
+            # plt.xticks(list(self.bus_table[qty_name]), list(self.bus_table['ID']),rotation=20)
+        elif qty_name in branch_options:
+            plt.plot(list(self.branch_table[qty_name]), label='add br '+self.upgrade_ele.get_ID())
+            print('ID={}'.format(list(self.branch_table['ID'])))
     def compute_metrics_on_nwk(self):
         br_overload_lst=self.branch_table['MVA overload (%)'].tolist()
         xfmr_overload_lst=self.xfmr_table['MVA overload (%)'].tolist()
@@ -77,7 +81,7 @@ class Scenario:
         branch_dict = {}
         branch_dict['from'] = [br.bus_FROMNUMBER for br in branch_lst]
         branch_dict['to'] = [br.bus_TONUMBER for br in branch_lst]
-        branch_dict['ID'] = [br.branch_ID for br in branch_lst]
+        branch_dict['ID'] = [br.get_ID() for br in branch_lst]
         branch_dict['P (MW)'] = [flow[0][i] for i in unique_idx]
         branch_dict['Q (MVar)'] = [flow[1][i] for i in unique_idx]
         branch_dict['MVA overload (%)'] = [branch_ovd_percent[i] for i in unique_idx]
