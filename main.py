@@ -8,12 +8,18 @@ import matplotlib.pyplot as plt
 import random
 import itertools
 
+# --------- load transmission network case: ------------
 # path_to_cases="C:/Users/jaimi/OneDrive/Documents/PTI/PSSE35/my_cases/3bus/"
 # filename="3bus.sav"
 path_to_cases="C:/Users/jaimi/OneDrive/Documents/PTI/PSSE35/my_cases/7bus/"
 filename="7bus_with_xfmr_and_wind.sav"
 psspy.psseinit()
 open_case(path_to_cases+filename)
+
+# automated routine 1:
+# we add a transmission line to every possible bus pair and determine the line that
+# -> reduces line overloading the most
+# -> reduces xfmr overloading the most
 
 # --------- setup -------------
 random.seed(4) # so that get same random colors plotted each time
