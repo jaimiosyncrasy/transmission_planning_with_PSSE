@@ -1,18 +1,36 @@
-# automated routine 1:
+# automated routine 2:
 # replace an xfmr with larger ampacity on various branches and determine the xfmr that
 # -> reduces line congestion the most
 # -> reduced fault currents the most
 # -> reduces line+xfmr overloading the most
 
-# automated routine 2:
+# automated routine 1:
 # add a transmission line to various buses and determine the bus that
 # -> reduces line congestion the most
 # -> reduces fault currents the most
 # -> reduces line+xfmr overloading the most
 
-# routine 3:
+# routine 4:
 # given a bus of interest,
 # add a transmission line and return summary of changes to congestion, fault currents, and line+xfmr loading
 
+# routine 3:
+# iterate over all posible generator locations and add a solar or wind farm
+# assessment: run a dynamic simulation, then assess the transient stability (based on overshoot & settling time of critical channels)
+# return best location for generator
 
 #----------------------------------------
+# To make root-locus automation:
+# put dynamic sim initialization init steps into function
+
+# init_dyn_sim()
+for Kpvals in [0.2,0.3,0.4]:
+    raw_output=run_dyn_sim(type='bump',parm_name,parm_val)
+    res=collect_results(raw_output)
+    add_res_to_plot_overlay(res, channel=parm_name)
+plt.show()
+
+# create a SimResults class
+# collect_results may be the most complicated,
+# b/c need to translate the .out into a dict
+# where keys are channel names
