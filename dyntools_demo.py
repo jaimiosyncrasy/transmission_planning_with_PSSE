@@ -17,6 +17,8 @@ able to use 'dyntools' module.
 Self installation EXE files for these modules are available at:
    PSSE User Support Web Page and follow link 'Python Modules used by PSSE Python Utilities'.
 
+See PSSE_DOCS/Sphinx/api/dyntools.CHNF.html for help
+
 - This version of the dyntools module is developed and tested using these open source modules.
   Python 3.7.3 [64 bit]
   matplotlib-3.1.1
@@ -238,14 +240,14 @@ def test1_data_extraction(outpath=None, output_txt_filename='test1_dyntools.txt'
 # See how "set_plot_legend_options" method can be used to place and format legends
 
 def test2_subplots_one_trace(outpath=None, show=True, outvrsn=0):
-    '''for each .out, plots multiple suplots in 1 figure'''
+    '''for each .out, plots multiple suplots in 1 figure. Fig can be a set of .png or a .pdf'''
     import psspy
     import dyntools
     psspy.set_fpcw_py()     # To use PSSE, numpy and matplotlib, this is needed.
 
     outfile1, outfile2, outfile3, prgfile = get_demotest_file_names(outpath, outvrsn)
 
-    chnfobj = dyntools.CHNF(outfile1, outfile2, outvrsn=outvrsn)
+    chnfobj = dyntools.CHNF(outfile1, outfile2, outvrsn=outvrsn) # if pass 2 output files, chnfobj has attributes outfdct and outobj of length 2
 
     chnfobj.set_plot_page_options(size='letter', orientation='portrait')
     chnfobj.set_plot_markers('square', 'triangle_up', 'thin_diamond', 'plus', 'x',
@@ -264,7 +266,7 @@ def test2_subplots_one_trace(outpath=None, show=True, outvrsn=0):
                 6:{'chns':[26, '(1+v)*60'], 'title':'Ch#26,bus154_fault, Frequency (Hz)'},
                 }
     pn,x     = os.path.splitext(outfile1)
-    pltfile1 = pn+'.pdf'
+    pltfile1 = pn+'.pdf' # publishes bus154 plots as pdf
 
     optnchn2 = {1:{'chns':{outfile2:6},                'title':'Channel 6 from bus3018_gentrip, P(pu)'},
                 2:{'chns':{outfile2:[6, 'v*100']},     'title':'Channel 6 from bus3018_gentrip, P(MW)'},
@@ -272,9 +274,9 @@ def test2_subplots_one_trace(outpath=None, show=True, outvrsn=0):
                 4:{'chns':{outfile2:16}},
                 5:{'chns':{outfile2:26},               'title':'Ch#26,bus3018_gentrip, Frequency (pu)'},
                 6:{'chns':{outfile2:[26, '(1+v)*60']}, 'title':'Ch#26,bus3018_gentrip, Frequency (Hz)'},
-                }
+                } # 6,11,16,26 are the channel numbers
     pn,x     = os.path.splitext(outfile2)
-    pltfile2 = pn+'.png'
+    pltfile2 = pn+'.png' # publishes bus3018 plots as pdf
 
     figfiles1 = chnfobj.xyplots(optnchn1,optnfmt,pltfile1)
 
@@ -304,6 +306,8 @@ def test2_subplots_one_trace(outpath=None, show=True, outvrsn=0):
 #    Channels specified with normal dictionary
 
 def test3_subplots_mult_trace(outpath=None, show=True, outvrsn=0):
+    '''for each .out, plots multiple suplots in 1 figure.
+    In each subplot, can have multiple lines (traces) overlayed. Fig can be a set of .png or a .pdf'''
 
     import psspy
     import dyntools
@@ -322,10 +326,12 @@ def test3_subplots_mult_trace(outpath=None, show=True, outvrsn=0):
     optnfmt  = {'rows':2,'columns':2,'dpi':300,'showttl':False, 'showoutfnam':True, 'showlogo':False,
                 'legendtype':2, 'addmarker':True}
 
+    # bus154_fault, published as .png:
     optnchn1 = {1:{'chns':[1]},2:{'chns':[2]},3:{'chns':[3]},4:{'chns':[4]},5:{'chns':[5]}}
     pn,x     = os.path.splitext(outfile1)
     pltfile1 = pn+'.png'
 
+    # bus3018_gentrip, published as .pdf:
     optnchn2 = {1:{'chns':{outfile2:1}},
                 2:{'chns':{'v82_test1_bus_fault.out':3}},
                 3:{'chns':4},
@@ -334,11 +340,13 @@ def test3_subplots_mult_trace(outpath=None, show=True, outvrsn=0):
     pn,x     = os.path.splitext(outfile2)
     pltfile2 = pn+'.pdf'
 
-    optnchn3 = {1:{'chns':{outfile1:1}},
-                2:{'chns':{outfile2:[1,5]}},
-                3:{'chns':{outfile3:3}},
-                4:{'chns':[4,'v-v0',5,'v-v0']},  # arbitrary function
-               }
+    # brn3005_3007_trip, published as .png:
+    optnchn3 = {1:{'chns':{outfile1:1}},  #upper left
+                2:{'chns':{outfile2:[1,5]}},  #upper right; channel1 in blue, channel2 in red
+                # 2: {'chns': {outfile2: 5}},  # upper right
+                3:{'chns':{outfile3:3}},  # lower left
+                4:{'chns':[4,'v-v0',5,'v-v0']},  # lower right
+                }
     pn,x     = os.path.splitext(outfile3)
     pltfile3 = pn+'.png'
 
@@ -351,6 +359,63 @@ def test3_subplots_mult_trace(outpath=None, show=True, outvrsn=0):
     figfiles.extend(figfiles3)
     if figfiles:
         txt = ' Test3:Plot files saved:\n'
+        for f in figfiles:
+            txt += "    {}\n".format(f)
+        print(txt)
+
+    if show:
+        chnfobj.plots_show()
+    else:
+        chnfobj.plots_close()
+
+    psspy.set_fpcw_psse()   # To use PSSE, numpy and matplotlib, this is needed.
+
+def test_sensitivity_mult_trace(outpath=None, show=True, outvrsn=0):
+    '''suppose we have two .out, where the only difference is that a parameter was varied between the sim runs
+    we plot the same channel of each .out in a single subplot'''
+
+    import psspy
+    import dyntools
+    psspy.set_fpcw_py()     # To use PSSE, numpy and matplotlib, this is needed.
+
+    outfile1, outfile2, outfile3, prgfile = get_demotest_file_names(outpath, outvrsn)
+    # outfile_lst=get_sensitivity_sim_outfile_names(outpath,outvrsn) # todo: write
+    outfile_lst=[outfile1,outfile2] # temp
+
+    # chnfobj = dyntools.CHNF(outfile1, outfile2, outfile3, outvrsn=outvrsn)
+    chnfobj = dyntools.CHNF(*outfile_lst, outvrsn=outvrsn)
+
+    chnfobj.set_plot_page_options(size='letter', orientation='portrait')
+    chnfobj.set_plot_markers('square', 'triangle_up', 'thin_diamond', 'plus', 'x',
+                             'circle', 'star', 'hexagon1')
+    chnfobj.set_plot_line_styles('solid', 'dashed', 'dashdot', 'dotted')
+    chnfobj.set_plot_line_colors('blue', 'red', 'black', 'green', 'cyan', 'magenta', 'pink', 'purple')
+
+    optnfmt  = {'rows':2,'columns':2,'dpi':300,'showttl':False, 'showoutfnam':True, 'showlogo':False,
+                'legendtype':2, 'addmarker':True}
+
+    #----------- set channels to plot--------------
+    # overlay of channels from two .out, published as .png:
+    lst_channels=[3,4] # channels to plot
+    channel_opts={}
+    for i,ch_num in enumerate(lst_channels):
+        channel_opts[i] = {'chns':
+                               {outfile: ch_num for outfile in outfile_lst}
+                           }
+    # example:
+    # optnchn3 = {1:{'chns':{outfile1:3,outfile2:3}},  # upper left; plot 3rd channel from each .out
+    #             2:{'chns':{outfile1:4,outfile2:4}},  #upper right; plot 4th channel from each .out
+    #             }
+
+    pnn,x     = os.path.split(outfile_lst[0])
+    pltfile3=os.path.join(pnn,'sens_plot.png')
+    #----------------------------------------------
+
+    figfiles3 = chnfobj.xyplots(channel_opts,optnfmt,pltfile3)
+
+    figfiles = figfiles3[:]
+    if figfiles:
+        txt = ' TestSens:Plot files saved:\n'
         for f in figfiles:
             txt += "    {}\n".format(f)
         print(txt)
@@ -482,28 +547,32 @@ def run_tests(which, outvrsn, show, datapath=None, prg2file=True):
         test0_run_simulation(datapath, outpath, outvrsn)
         print(" Output files folder:{}".format(outpath))
 
-    if which in [1, 'all']:
-        print(" <<<<<< Begin TEST=1 >>>>>>")
-        test1_data_extraction(outpath=outpath, show=show, outvrsn=outvrsn, prg2file=prg2file)
-
     if which in [2, 'all']:
-        print(" <<<<<< Begin TEST=2 >>>>>>")
-        test2_subplots_one_trace(outpath, show, outvrsn)
+        print(" <<<<<< Begin test of sensitivity >>>>>>")
+        test_sensitivity_mult_trace(outpath, show, outvrsn)
+    #
+    # if which in [1, 'all']:
+    #     print(" <<<<<< Begin TEST=1 >>>>>>")
+    #     test1_data_extraction(outpath=outpath, show=show, outvrsn=outvrsn, prg2file=prg2file)
+    #
+    # if which in [2, 'all']:
+    #     print(" <<<<<< Begin TEST=2 >>>>>>")
+    #     test2_subplots_one_trace(outpath, show, outvrsn)
+    #
+    # if which in [3, 'all']:
+    #     print(" <<<<<< Begin TEST=3 >>>>>>")
+    #     test3_subplots_mult_trace(outpath, show, outvrsn)
 
-    if which in [3, 'all']:
-        print(" <<<<<< Begin TEST=3 >>>>>>")
-        test3_subplots_mult_trace(outpath, show, outvrsn)
-
-    if which in [4, 'all']:
-        print(" <<<<<< Begin TEST=4 >>>>>>")
-        test4_subplots_mult_trace_OrderedDict(outpath, show, outvrsn)
-
-    if which in [5, 'all']:
-        print(" <<<<<< Begin TEST=5 >>>>>>")
-        try:
-            test5_plots2word(outpath, show, outvrsn)
-        except:
-            pass
+    # if which in [4, 'all']:
+    #     print(" <<<<<< Begin TEST=4 >>>>>>")
+    #     test4_subplots_mult_trace_OrderedDict(outpath, show, outvrsn)
+    #
+    # if which in [5, 'all']:
+    #     print(" <<<<<< Begin TEST=5 >>>>>>")
+    #     try:
+    #         test5_plots2word(outpath, show, outvrsn)
+    #     except:
+    #         pass
 
 # =============================================================================================
 
