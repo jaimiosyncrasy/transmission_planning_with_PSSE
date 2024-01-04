@@ -30,7 +30,13 @@ for Kpvals in [0.2,0.3,0.4]:
     add_res_to_plot_overlay(res, channel=parm_name)
 plt.show()
 
-# create a SimResults class
-# collect_results may be the most complicated,
-# b/c need to translate the .out into a dict
-# where keys are channel names
+
+# [done] 1. dyntools func covers collect_results and add_res_to_plot_overlay
+# 2. modify dyntools sample sim to rerun 3 times with different parm values that produces 3 .out file
+# 3. setup to load recording of sim from separate file
+
+# next,
+# record you running your sim manually, then have a script that
+(1) varies one parameter
+(2) executes the recording,
+(3) saves to .out with param+value in the name
