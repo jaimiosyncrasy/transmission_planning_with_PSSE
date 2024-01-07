@@ -18,7 +18,9 @@ def initialize_dyn_sim():
     # perform a simplified low flow
     psspy.tysl(0)
     # define output channels
-    psspy.bsys(0, 0, [13.8, 500.], 1, [1], 0, [], 0, [], 0, [])  # define bus subsystem for channel outputs
+    kv_base=13.8
+    mva_base=500
+    psspy.bsys(0, 0, [kv_base, mva_base], 1, [1], 0, [], 0, [], 0, [])  # define bus subsystem for channel outputs
     psspy.chsb(0, 0, [-1, -1, -1, 1, 12, 0])
     psspy.chsb(0, 0, [-1, -1, -1, 1, 13, 0])
     psspy.chsb(0, 0, [-1, -1, -1, 1, 16, 0])
@@ -31,20 +33,24 @@ def run_dyn_sim(parm_val, outfile_fullpath):
     '''paste parm changes, faults, and run commands from recording'''
     # when you paste the recording, you need to replace 2 hardcoded areas: (1) the parameter key+value, and (2) the output file name
 
-    psspy.change_plmod_con(2,r"""1""",r"""SEXS""",3,parm_val) # change parms
+    psspy.change_plmod_con(2,r"""1""",r"""SEXS""",3,parm_val) # change parms; 2nd last arg is param index
     # psspy.strt_2([0,0],r"""C:\Users\jaimi\OneDrive\Documents\PTI\PSSE35\EXAMPLE\2.Brazilian_7_bus_Equivalent_Model_V32_Files\PSSE\parms_35_and_13.out""")
-    psspy.strt_2([0,0],+outfile_fullpath)
+    psspy.strt_2([0,0],outfile_fullpath)
     psspy.run(0,1.0,0,1,1)
-    psspy.dist_3phase_bus_fault(4,0,1,765.0,[0.0,-0.2E+10])
+    # psspy.dist_3phase_bus_fault(4,0,1,765.0,[0.0,-0.2E+10]) # first arg is index of bus fault (first idx=0)
+    psspy.dist_3phase_bus_fault(2, 0, 1, 500.0, [0.0, -0.2E+10])
     psspy.run(0,1.1,0,1,1)
     psspy.dist_clear_fault(1)
     psspy.run(0,4.0,0,1,1)
 
 
 def run_parm_sens_routine(path):
-    parm_vals = [0.2, 0.3, 0.4]
-    parm_name = 'Kp' # we assume this matches what you change in recording the dyn sim
-    channels_lst = [3, 4]
+    parm_vals = [20,30,40]
+    parm_name = "K" # param you're varying; used for .out filename
+    # we assume that parm_name corresponds to the parm number (2nd last arg of change_plmod_con)
+    # todo: print channel list
+
+    channels_lst = [4,6] # set of channels to plot; for each, get overlay of different parameter cases
 
     initialize_dyn_sim()
     outfile_lst = []
@@ -54,14 +60,18 @@ def run_parm_sens_routine(path):
         outfile_fullpath = path + outfile_name
         outfile_lst.append(outfile_fullpath)
         run_dyn_sim(parm_val, outfile_fullpath)
+
     test_sensitivity_mult_trace(outfile_lst, channels_lst)  # plot
 
 if __name__ == '__main__':
     import psse35
 
-    path_to_case = "C:/Users/jaimi/OneDrive/Documents/PTI/PSSE35/EXAMPLE/less_50_buses/"
+    # path_to_case = "C:/Users/jaimi/OneDrive/Documents/PTI/PSSE35/EXAMPLE/less_50_buses/"
     sav_filename = "savnw.sav"
     dyr_filename = "savnw.dyr"""
+    path_to_case="C:/Users/jaimi/OneDrive/Documents/PTI/PSSE35/EXAMPLE/2.Brazilian_7_bus_Equivalent_Model_V32_Files/PSSE/"
+    sav_filename = "Brazilian_7_bus_Equiv_Model.sav"
+    dyr_filename = "Brazilian_7_bus_Equiv_Model.dyr"""
     psspy.psseinit()
 
     # psspy.lines_per_page_one_device(1, 10000000)

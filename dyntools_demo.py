@@ -370,7 +370,8 @@ def test3_subplots_mult_trace(outpath=None, show=True, outvrsn=0):
 
     psspy.set_fpcw_psse()   # To use PSSE, numpy and matplotlib, this is needed.
 
-def test_sensitivity_mult_trace(outpath=None, show=True, outvrsn=0):
+def test_sensitivity_mult_trace(outfile_lst, channels_lst,show=True,outvrsn=0):
+    # Jaimie wrote this func
     '''suppose we have two .out, where the only difference is that a parameter was varied between the sim runs
     we plot the same channel of each .out in a single subplot'''
 
@@ -378,12 +379,11 @@ def test_sensitivity_mult_trace(outpath=None, show=True, outvrsn=0):
     import dyntools
     psspy.set_fpcw_py()     # To use PSSE, numpy and matplotlib, this is needed.
 
-    outfile1, outfile2, outfile3, prgfile = get_demotest_file_names(outpath, outvrsn)
-    # outfile_lst=get_sensitivity_sim_outfile_names(outpath,outvrsn) # todo: write
-    outfile_lst=[outfile1,outfile2] # temp
+    # outfile1, outfile2, outfile3, prgfile = get_demotest_file_names(outpath, outvrsn)
 
-    # chnfobj = dyntools.CHNF(outfile1, outfile2, outfile3, outvrsn=outvrsn)
     chnfobj = dyntools.CHNF(*outfile_lst, outvrsn=outvrsn)
+    outobj = dyntools.OUTDATA(outfile_lst[0], outvrsn)
+    print('There are {} channels total'.format(len(outobj.chids)))
 
     chnfobj.set_plot_page_options(size='letter', orientation='portrait')
     chnfobj.set_plot_markers('square', 'triangle_up', 'thin_diamond', 'plus', 'x',
@@ -396,9 +396,9 @@ def test_sensitivity_mult_trace(outpath=None, show=True, outvrsn=0):
 
     #----------- set channels to plot--------------
     # overlay of channels from two .out, published as .png:
-    lst_channels=[3,4] # channels to plot
+    # channels_lst=[3,4] # channels to plot
     channel_opts={}
-    for i,ch_num in enumerate(lst_channels):
+    for i,ch_num in enumerate(channels_lst):
         channel_opts[i] = {'chns':
                                {outfile: ch_num for outfile in outfile_lst}
                            }
@@ -407,8 +407,8 @@ def test_sensitivity_mult_trace(outpath=None, show=True, outvrsn=0):
     #             2:{'chns':{outfile1:4,outfile2:4}},  #upper right; plot 4th channel from each .out
     #             }
 
-    pnn,x     = os.path.split(outfile_lst[0])
-    pltfile3=os.path.join(pnn,'sens_plot.png')
+    figure_path,x     = os.path.split(outfile_lst[0])
+    pltfile3=os.path.join(figure_path,'sens_plot.png')
     #----------------------------------------------
 
     figfiles3 = chnfobj.xyplots(channel_opts,optnfmt,pltfile3)
